@@ -1,0 +1,14 @@
+*.sln*
+*.vcxproj*
+*.vcxitems*
+.vs
+Debug
+x64
+lifegame-client/Debug
+lifegame-client/x64
+lifegame-network/Debug
+lifegame-network/x64
+lifegame-server/Debug
+lifegame-server/x64
+lifegame-test/Debug
+lifegame-test/x64
