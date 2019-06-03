@@ -15,15 +15,17 @@ namespace network
 			while (processedSize < rawPacketSize)
 			{
 				// Get raw packet as a packet struct.
-				const udp::Packet* packet = udp::unserialize(rawPacket);
-				if (processedSize + packet->size() > rawPacketSize || packet->bodySize() > udp::Packet::BodyMaxSize)
+				udp::Packet packet;
+				memcpy(&packet, rawPacket, rawPacketSize);
+				//const udp::Packet* packet = udp::unserialize(rawPacket);
+				if (processedSize + packet.size() > rawPacketSize || packet.bodySize() > udp::Packet::BodyMaxSize)
 				{
 					// Malformed packet.
 					return;
 				}
-				onPacketReceived(packet);
-				processedSize += packet->size();
-				rawPacket += packet->size();
+				onPacketReceived(&packet);
+				processedSize += packet.size();
+				rawPacket += packet.size();
 			}
 		}
 

@@ -51,7 +51,8 @@ namespace network
 				}
 
 				// Copy packet struct into the raw packet array. 
-				memcpy(rawPacket, packet.serialize(), packet.size());
+				memcpy(rawPacket, &packet, sizeof(packet));
+				//memcpy(rawPacket, packet.serialize(), packet.size());
 				rawPacket += packet.size();
 				serializedSize += packet.size();
 

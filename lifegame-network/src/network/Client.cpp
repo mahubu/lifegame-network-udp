@@ -95,7 +95,7 @@ namespace network
 			onPacketReceived(datagram.body.data(), datagram.bodySize);
 		}
 
-		void Client::onPacketReceived(const uint8_t* rawPacket, const size_t rawPacketSize)
+		void Client::onPacketReceived(const PacketUnit* rawPacket, const size_t rawPacketSize)
 		{
 			receptionHandler_.onReceived(rawPacket, rawPacketSize);
 			auto packets = receptionHandler_.unserialize();

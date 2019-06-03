@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include <string>
 
 int main()
@@ -49,10 +50,14 @@ int main()
 			else if (event->is<network::event::Exchange>())
 			{
 				auto exchange = event->as<network::event::Exchange>();
-				std::string stoc("client->server: " + std::to_string(i++));
+				auto packet = exchange->packet();
+				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << "' (" << packet.size() << ")" << std::endl;
+
+				std::ostringstream stream;
+				stream << "s->c " << i++;
+				std::string stoc = stream.str();
 				std::vector<network::PacketUnit> msg(stoc.begin(), stoc.end());
 				clientHandler.queue(event->client(), std::move(msg));
-				std::cout << "Exchange: " << stoc << std::endl;
 			}
 			else
 			{

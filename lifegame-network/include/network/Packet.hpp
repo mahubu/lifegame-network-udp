@@ -40,13 +40,13 @@ namespace network
 			static constexpr size_t MaxMessageSize = MaxPacketsPerMessage * BodyMaxSize;
 
 			Header header;
-			std::array<uint8_t, BodyMaxSize> body;
+			std::array<PacketUnit, BodyMaxSize> body;
 
 			/*inline*/ IdType id() const { return header.id; }
 			/*inline*/ uint16_t bodySize() const { return header.size; }
 			/*inline*/ Type type() const { return header.type; }
 			/*inline*/ uint16_t size() const { return HeaderSize + header.size; }
-			/*inline*/ uint8_t* bodyData() { return body.data(); }
+			/*inline*/ PacketUnit* bodyData() { return body.data(); }
 			///*inline*/ const uint8_t* bodyData() const noexcept { return body.data(); }
 
 			/*

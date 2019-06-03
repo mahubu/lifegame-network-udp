@@ -9,6 +9,7 @@
 #include <Cell.hpp>
 #include <Dish.hpp>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 int main(int argc, char* argv[])
@@ -58,10 +59,14 @@ int main(int argc, char* argv[])
 			else if (event->is<network::event::Exchange>())
 			{
 				auto exchange = event->as<network::event::Exchange>();
-				std::string stoc("server->client: " + std::to_string(i++));
-				std::vector<network::PacketUnit> msg(stoc.begin(), stoc.end());
+				auto packet = exchange->packet();
+				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << "' (" << packet.size() << ")" << std::endl;
+
+				std::ostringstream stream;
+				stream << "c->s " << i++;
+				std::string ctos = stream.str();
+				std::vector<network::PacketUnit> msg(ctos.begin(), ctos.end());
 				clientHandler.queue(event->client(), std::move(msg));
-				std::cout << "Exchange: " << stoc << std::endl;
 			}
 			else
 			{
