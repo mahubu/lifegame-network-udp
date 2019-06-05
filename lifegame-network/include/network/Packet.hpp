@@ -28,26 +28,26 @@ namespace network
 
 			struct Header
 			{
-				IdType id;
+				IdType id{ 0 };
 				uint16_t size{ 0 }; // Body size.
-				Type type;
+				Type type{ Type::Complete };
 			};
 
 			static constexpr uint16_t PacketMaxSize = Datagram::BodyMaxSize;
 			static constexpr uint16_t HeaderSize = sizeof(Header);
 			static constexpr uint16_t BodyMaxSize = PacketMaxSize - HeaderSize;
-			static constexpr size_t MaxPacketsPerMessage = 32;
+			static constexpr size_t MaxPacketsPerMessage = 32; // Maximum allowed message size: ~40ko
 			static constexpr size_t MaxMessageSize = MaxPacketsPerMessage * BodyMaxSize;
+			static constexpr size_t MaxPacketQueueSize = 2 * MaxPacketsPerMessage;
 
 			Header header;
-			std::array<PacketUnit, BodyMaxSize> body;
+			std::array<PacketUnit, BodyMaxSize> body{ 0 };
 
 			/*inline*/ IdType id() const { return header.id; }
 			/*inline*/ uint16_t bodySize() const { return header.size; }
 			/*inline*/ Type type() const { return header.type; }
 			/*inline*/ uint16_t size() const { return HeaderSize + header.size; }
 			/*inline*/ PacketUnit* bodyData() { return body.data(); }
-			///*inline*/ const uint8_t* bodyData() const noexcept { return body.data(); }
 
 			/*
 			* @brief Serialize the packet as a 'PacketUnit' array.

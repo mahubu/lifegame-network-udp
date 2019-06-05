@@ -29,6 +29,7 @@ namespace network
 			}
 		}
 
+		// TODO by reference
 		void ReceptionHandler::onPacketReceived(const udp::Packet* packet)
 		{
 			if (!helper::isNewer(packet->id(), lastProcessed_))
@@ -61,15 +62,17 @@ namespace network
 
 			auto packetIt = queue_.begin();
 			auto endIt = queue_.end();
-			std::vector<udp::Packet>::iterator newestPacket;
+			std::vector<udp::Packet>::iterator latestPacket;
 			while (packetIt != endIt)
 			{
+				// TODO remove too old & malformed packet.
+
 				// Complete packet.
 				if (packetIt->type() == udp::Packet::Type::Complete)
 				{
 					std::vector<PacketUnit> packet(packetIt->body.data(), packetIt->body.data() + packetIt->bodySize());
 					packets.push_back(std::move(packet));
-					newestPacket = packetIt;
+					latestPacket = packetIt;
 					++packetIt;
 				}
 				// Partial packet.
@@ -78,9 +81,6 @@ namespace network
 					// TODO don't use lambda expression ?
 					std::vector<PacketUnit> packet = [&]()
 					{
-						// TODO factorize !!!
-						//const uint8_t* body = packetIt->body.data();
-
 						// Initializing packet with first part.
 						std::vector<PacketUnit> packet(packetIt->body.data(), packetIt->body.data() + packetIt->bodySize());
 						auto expectedId = packetIt->id();
@@ -90,27 +90,27 @@ namespace network
 						++expectedId;
 						while (packetIt != endIt && packetIt->id() == expectedId)
 						{
-							// Last packet part.
-							if (packetIt->type() == udp::Packet::Type::PartialLast)
-							{
-								packet.insert(packet.end(), packetIt->body.data(), packetIt->body.data() + packetIt->bodySize());
-								return packet;
-							}
 							// Intermediate packet part.
-							else if (packetIt->type() == udp::Packet::Type::PartialInBetween)
+							if (packetIt->type() == udp::Packet::Type::PartialInBetween)
 							{
 								packet.insert(packet.end(), packetIt->body.data(), packetIt->body.data() + packetIt->bodySize());
 								++packetIt;
 								++expectedId;
 							}
-							// Malformed packet.
+							// Last packet part.
+							else if (packetIt->type() == udp::Packet::Type::PartialLast)
+							{
+								packet.insert(packet.end(), packetIt->body.data(), packetIt->body.data() + packetIt->bodySize());
+								return packet;
+							}
+							// Unknown / Malformed packet.
 							else
 							{
 								packet.clear();
 								return packet;
 							}
 						}
-						// Malformed packet.
+						// Incomplete packet.
 						packet.clear();
 						return packet;
 					}();
@@ -119,22 +119,28 @@ namespace network
 					{
 						// Inserting formed packet.
 						packets.push_back(std::move(packet));
-						newestPacket = packetIt;
+						latestPacket = packetIt;
 						++packetIt;
 					}
+					else 
+					{
+						// Unknown / Malformed / incomplete packet
+						break;
+					}
 				}
-				// Unknown / malformed packet.
+				// Unknown / malformed / incomplete packet
 				else
 				{
-					++packetIt;
+					//++packetIt;
+					break;
 				}
 			}
 
 			if (!packets.empty())
 			{
-				lastProcessed_ = newestPacket->id();
-				// Wipe all processed packets.
-				queue_.erase(queue_.begin(), std::next(newestPacket));
+				lastProcessed_ = latestPacket->id();
+				// Erase all processed packets.
+				queue_.erase(queue_.begin(), std::next(latestPacket));
 			}
 
 			return packets;

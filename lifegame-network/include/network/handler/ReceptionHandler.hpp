@@ -35,6 +35,16 @@ namespace network
 			*/
 			std::vector<std::vector<PacketUnit>> unserialize();
 
+			/*
+			* @return the queue size of receiving messages.
+			*/
+			size_t size() const { return queue_.size(); };
+
+			/*
+			* @return the last processed packet identifier.
+			*/
+			udp::Packet::IdType lastProcessed() const { return lastProcessed_; };
+
 		private:
 			void onPacketReceived(const udp::Packet* packet);
 

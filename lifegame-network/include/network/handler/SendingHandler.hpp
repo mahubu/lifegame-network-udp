@@ -2,6 +2,7 @@
 
 #include <network/Sockets.hpp>
 #include <network/Packet.hpp>
+#include <network/PacketHolder.hpp>
 #include <network/event/Event.hpp>
 #include <list>
 #include <vector>
@@ -21,25 +22,48 @@ namespace network
 			~SendingHandler() = default;
 
 			/*
-			* @brief Enqueue a packet to be send.
+			* @brief Enqueue a packet to be sent.
 			*
-			* @param rawPacket the packet to send.
+			* @param rawPacket the packet to sent.
 			*/
 			void queue(std::vector<PacketUnit>&& rawPacket);
 
 			/*
-			* @brief Serialize the enqueued packets to an unique packet.
+			* @brief Serialize the enqueued packets to an unique datagram.
 			*
-			* @param rawPacket the unique packet containing enqueued packets.
-			* @param rawPacketSize the unique packet size.
+			* @param datagram the unique datagram id.
+			* @param rawPacket the unique datagram containing enqueued packets.
+			* @param rawPacketSize the unique datagram size.
 			*
 			* @return the unique packet size.
 			*/
-			size_t serialize(PacketUnit* rawPacket, const size_t rawPacketSize);
+			size_t serialize(udp::Datagram::IdType datagram, PacketUnit* rawPacket, const size_t rawPacketSize);
+
+			// TODO doc
+			void onAcked(udp::Datagram::IdType datagram);
+
+			// TODO doc
+			void onLost(udp::Datagram::IdType datagram);
+
+			/*
+			* @return the queue size of sending messages.
+			*/
+			size_t size() const { return queue_.size(); };
+
+			/*
+			* @return the next packet identifier that will be sent.
+			*/
+			udp::Packet::IdType nextId() const { return nextId_; };
+
+			/*
+			* @return the packet identifier that is expected to be sent next.
+			*/
+			udp::Packet::IdType nextExpected() const { return nextExpected_; };
 
 		private:
-			std::vector<udp::Packet> queue_;
-			udp::Packet::IdType newId_{ 0 };
+			std::vector<udp::PacketHolder> queue_;
+			udp::Packet::IdType nextId_{ 0 };
+			udp::Packet::IdType nextExpected_{ 0 };
 
 		};
 	}

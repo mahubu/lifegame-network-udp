@@ -69,7 +69,7 @@ namespace network
 				Datagram datagram;
 				sockaddr_in from{ 0 };
 				socklen_t length = sizeof(from);
-				int received = ::recvfrom(socket_, reinterpret_cast<char*>(&datagram), Datagram::BufferMaxSize, 0, reinterpret_cast<sockaddr*>(&from), &length);
+				int received = ::recvfrom(socket_, reinterpret_cast<char*>(&datagram), Datagram::DatagramMaxSize, 0, reinterpret_cast<sockaddr*>(&from), &length);
 				if (received > 0)
 				{
 					if (received > Datagram::HeaderSize)

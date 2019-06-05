@@ -16,18 +16,16 @@ namespace network
 		Client::Client(ClientHandler& handler, const sockaddr_storage& address) : clientHandler_(handler)
 		{
 			std::memcpy(&address_, &address, sizeof(address));
-			//std::cout << "Client address: " << &address_ << " vs " << &address << std::endl;
 		}
 
 		bool Client::fill(Datagram& datagram)
 		{
-			datagram.bodySize = sendingHandler_.serialize(datagram.body.data(), Datagram::BodyMaxSize);
+			datagram.bodySize = sendingHandler_.serialize(nextDatagramIdToSend_, datagram.body.data(), Datagram::BodyMaxSize);
 			if (datagram.bodySize > 0)
 			{
 				datagram.header.id = htons(nextDatagramIdToSend_++);
 				datagram.header.newestAck = htons(receptionAck_.lastAck());
 				datagram.header.previousAcks = receptionAck_.previousAcks();
-				//++nextDatagramIdToSend_;
 				return true;
 			}
 			return false;
@@ -71,24 +69,17 @@ namespace network
 			}
 
 			// Handle sended packets that have NOT been acked.
-			const auto datagramsSentLost = sendingAck_.losses();
-			for (const auto sendLoss : datagramsSentLost)
+			const auto sentLosses = sendingAck_.losses();
+			for (const auto loss : sentLosses)
 			{
-				// TODO
+				sendingHandler_.onLost(loss);
 			}
 
 			// Handle sended packets that have been acked.
-			const auto datagramsSentAcked = sendingAck_.newAcks();
-			for (const auto sendAcked : datagramsSentAcked)
+			const auto sentAcks = sendingAck_.newAcks();
+			for (const auto ack : sentAcks)
 			{
-				// TODO
-			}
-
-			// Handle received packets that have been loss.
-			const auto lostDatagrams = receptionAck_.losses();
-			for (const auto receivedLostDatagram : lostDatagrams)
-			{
-				// TODO
+				sendingHandler_.onAcked(ack);
 			}
 
 			// Handle received packets that have NOT been loss.
@@ -101,7 +92,6 @@ namespace network
 			auto packets = receptionHandler_.unserialize();
 			for (auto&& packet : packets)
 			{
-				//memcpy(&(event->from), &address_, sizeof(address_));
 				clientHandler_.onReceived(std::make_unique<event::Exchange>(std::move(packet), address_));
 			}
 

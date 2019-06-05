@@ -23,9 +23,9 @@ namespace network
 			};
 
 			// Modern network MTU is expected to have at least a value of 1400 bytes.
-			static constexpr size_t BufferMaxSize = 1400;
+			static constexpr size_t DatagramMaxSize = 1400;
 			static constexpr size_t HeaderSize = sizeof(Header);
-			static constexpr size_t BodyMaxSize = BufferMaxSize - HeaderSize;
+			static constexpr size_t BodyMaxSize = DatagramMaxSize - HeaderSize;
 
 			Header header{ 0 };
 			std::array<PacketUnit, BodyMaxSize> body{ 0 };

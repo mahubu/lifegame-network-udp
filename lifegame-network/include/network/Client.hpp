@@ -60,7 +60,7 @@ namespace network
 			handler::SendingHandler sendingHandler_;
 
 			bool fill(Datagram& datagram);
-			void onPacketReceived(const uint8_t* packet, const size_t packetSize);
+			void onPacketReceived(const PacketUnit* packet, const size_t packetSize);
 
 		};
 	}
