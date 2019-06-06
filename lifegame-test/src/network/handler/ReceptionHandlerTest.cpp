@@ -46,7 +46,8 @@ namespace network
 			sending.serialize(datagramId++, buffer1.data(), buffer1.size());
 			reception.onReceived(buffer1.data(), buffer1.size());
 
-			const std::vector<std::vector<PacketUnit>> packets = reception.unserialize();
+			std::vector<std::vector<PacketUnit>> packets;
+			reception.unserialize(packets);
 			ASSERT_TRUE(reception.size() == 0);
 			ASSERT_TRUE(reception.lastProcessed() == 1);
 			ASSERT_TRUE(packets.size() == 2);
@@ -97,7 +98,8 @@ namespace network
 			const size_t serialized3 = sending.serialize(datagramId++, buffer3.data(), buffer3.size());
 			ASSERT_TRUE(serialized3 == 0);
 
-			const std::vector<std::vector<PacketUnit>> packets = reception.unserialize();
+			std::vector<std::vector<PacketUnit>> packets;
+			reception.unserialize(packets);
 			ASSERT_TRUE(reception.size() == 0);
 			ASSERT_TRUE(reception.lastProcessed() == 2);
 			ASSERT_TRUE(packets.size() == 1);
@@ -129,7 +131,8 @@ namespace network
 			reception.onReceived(buffer0.data(), buffer0.size());
 			sending.onAcked(0);
 
-			const std::vector<std::vector<PacketUnit>> completePackets = reception.unserialize();
+			std::vector<std::vector<PacketUnit>> completePackets;
+			reception.unserialize(completePackets);
 			ASSERT_TRUE(reception.size() == 1);
 			ASSERT_TRUE(reception.lastProcessed() == std::numeric_limits<udp::Packet::IdType>::max());
 			ASSERT_TRUE(completePackets.empty());
@@ -174,7 +177,8 @@ namespace network
 			const size_t serialized3 = sending.serialize(datagramId++, buffer3.data(), buffer3.size());
 			ASSERT_TRUE(serialized3 == 0);
 
-			const std::vector<std::vector<PacketUnit>> completePackets = reception.unserialize();
+			std::vector<std::vector<PacketUnit>> completePackets;
+			reception.unserialize(completePackets);
 			ASSERT_TRUE(reception.size() == 2);
 			ASSERT_TRUE(reception.lastProcessed() == std::numeric_limits<udp::Packet::IdType>::max());
 			ASSERT_TRUE(completePackets.empty());
@@ -226,7 +230,8 @@ namespace network
 			reception.onReceived(buffer4.data(), buffer4.size());
 			sending.onAcked(1);
 
-			const std::vector<std::vector<PacketUnit>> completePackets = reception.unserialize();
+			std::vector<std::vector<PacketUnit>> completePackets;
+			reception.unserialize(completePackets);
 			ASSERT_TRUE(reception.size() == 0);
 			ASSERT_TRUE(reception.lastProcessed() == 2);
 			ASSERT_TRUE(completePackets.size() == 1);

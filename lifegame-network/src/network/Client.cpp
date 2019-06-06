@@ -1,6 +1,7 @@
 #include <network/Sockets.hpp>
 #include <network/Client.hpp>
 #include <network/ClientHandler.hpp>
+#include <network/event/Disconnection.hpp>
 #include <network/event/Exchange.hpp>
 #include <assert.h>
 #include <memory>
@@ -38,6 +39,11 @@ namespace network
 
 		void Client::send()
 		{
+			if (sendingHandler_.idle()) {
+				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, address_));
+				return;
+			}
+
 			while (true)
 			{
 				Datagram datagram;
@@ -51,6 +57,11 @@ namespace network
 
 		void Client::onReceived(Datagram&& datagram)
 		{
+			if (receptionHandler_.idle()) {
+				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, address_));
+				return;
+			}
+
 			assert(datagram.bodySize > 0);
 
 			// Update the received acks tracking.
@@ -89,12 +100,13 @@ namespace network
 		void Client::onPacketReceived(const PacketUnit* rawPacket, const size_t rawPacketSize)
 		{
 			receptionHandler_.onReceived(rawPacket, rawPacketSize);
-			auto packets = receptionHandler_.unserialize();
+
+			std::vector<std::vector<PacketUnit>> packets;
+			receptionHandler_.unserialize(packets);
 			for (auto&& packet : packets)
 			{
 				clientHandler_.onReceived(std::make_unique<event::Exchange>(std::move(packet), address_));
 			}
-
 		}
 
 	}

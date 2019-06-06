@@ -32,7 +32,7 @@ namespace network
 		// TODO by reference
 		void ReceptionHandler::onPacketReceived(const udp::Packet* packet)
 		{
-			if (!helper::isNewer(packet->id(), lastProcessed_))
+			if (!helper::isNewer(packet->id(), lastProcessedId_))
 			{
 				// Packet too old.
 				return;
@@ -55,11 +55,8 @@ namespace network
 			}
 		}
 
-		// TODO pass 'packets' as parameter ?
-		std::vector<std::vector<PacketUnit>> ReceptionHandler::unserialize()
+		void ReceptionHandler::unserialize(std::vector<std::vector<PacketUnit>>& packets)
 		{
-			std::vector<std::vector<PacketUnit>> packets;
-
 			auto packetIt = queue_.begin();
 			auto endIt = queue_.end();
 			std::vector<udp::Packet>::iterator latestPacket;
@@ -138,12 +135,11 @@ namespace network
 
 			if (!packets.empty())
 			{
-				lastProcessed_ = latestPacket->id();
+				lastProcessedId_ = latestPacket->id();
+				lastProcessedTime_ = std::chrono::system_clock::now();
 				// Erase all processed packets.
 				queue_.erase(queue_.begin(), std::next(latestPacket));
 			}
-
-			return packets;
 		}
 
 	}

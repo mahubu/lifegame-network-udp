@@ -61,7 +61,7 @@ namespace network
 				}
 
 				// Allows packet to be sent according it's not too recent compared to the expected one.
-				if (/*helper::isNewer(packet.id(), nextAllowed_) &&*/ helper::difference(packet.id(), nextExpected_) >= udp::Packet::MaxPacketQueueSize)
+				if (helper::difference(packet.id(), nextExpectedId_) > udp::Packet::MaxPacketsPerMessage)
 				{
 					break;
 				}
@@ -73,6 +73,7 @@ namespace network
 				serializedSize += packet.size();
 
 				holder.sentWith(datagram);
+				lastSerializedTime_ = std::chrono::system_clock::now();
 			}
 			return serializedSize;
 		}
@@ -97,12 +98,12 @@ namespace network
 			// Next packet expected to be sent is the latest one.
 			if (queue_.empty())
 			{
-				nextExpected_ = nextId_;
+				nextExpectedId_ = nextId_;
 			}
 			// Next packet expected to be sent is the one at start of the queue. 
-			else if (helper::isNewer(queue_.front().packet().id(), nextExpected_))
+			else if (helper::isNewer(queue_.front().packet().id(), nextExpectedId_))
 			{
-				nextExpected_ = queue_.front().packet().id();
+				nextExpectedId_ = queue_.front().packet().id();
 			}
 		}
 

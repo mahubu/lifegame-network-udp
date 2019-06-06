@@ -16,6 +16,13 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Client.\n";
 
+	if (argc <= 1)
+	{
+		std::cerr << "Not enough arguments: " << argc - 1 << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	int port = std::stoi(argv[1], nullptr);
 
 	if (!network::startup())
 	{
@@ -24,20 +31,22 @@ int main(int argc, char* argv[])
 	}
 
 	network::udp::ClientHandler clientHandler;
-	if (!clientHandler.startup(10000))
+	if (!clientHandler.startup(port))
 	{
 		std::cerr << "Server initialization error: " << network::error::latest();
 		return EXIT_FAILURE;
 	}
 
 	// Initializing exchange by sending first datagram to server.
-	std::string ctos("client->server");
+	std::string ctos("c->s");
 	std::vector<network::PacketUnit> msg(ctos.begin(), ctos.end());
-	sockaddr_in address;
+	sockaddr_in address{ 0 };
 	inet_pton(AF_INET, "127.0.0.1", &address.sin_addr.s_addr);
 	address.sin_port = htons(11000);
 	address.sin_family = AF_INET;
-	clientHandler.queue(reinterpret_cast<sockaddr_storage&>(address), std::move(msg));
+	sockaddr_storage storage{ 0 };
+	memcpy(&storage, &address, sizeof(address));
+	clientHandler.queue(storage, std::move(msg));
 
 	int i = 0;
 	while (true)
@@ -54,16 +63,16 @@ int main(int argc, char* argv[])
 			else if (event->is<network::event::Disconnection>())
 			{
 				std::cout << "Disconnection. " << std::endl;
-
+				clientHandler.disconnect(event->client());
 			}
 			else if (event->is<network::event::Exchange>())
 			{
 				auto exchange = event->as<network::event::Exchange>();
 				auto packet = exchange->packet();
-				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << "' (" << packet.size() << ")" << std::endl;
+				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << std::endl;
 
 				std::ostringstream stream;
-				stream << "c->s " << i++;
+				stream << "c->s " << port << " " << i++;
 				std::string ctos = stream.str();
 				std::vector<network::PacketUnit> msg(ctos.begin(), ctos.end());
 				clientHandler.queue(event->client(), std::move(msg));

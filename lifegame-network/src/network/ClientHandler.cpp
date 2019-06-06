@@ -22,7 +22,7 @@ namespace network
 				return false;
 			}
 
-			sockaddr_in address;
+			sockaddr_in address{ 0 };
 			address.sin_addr.s_addr = INADDR_ANY;
 			address.sin_port = htons(port);
 			address.sin_family = AF_INET;
@@ -54,6 +54,19 @@ namespace network
 			client.queue(std::move(packet));
 		}
 
+		void ClientHandler::disconnect(const sockaddr_storage& address)
+		{
+			auto itClient = std::find_if(
+				clients_.begin(),
+				clients_.end(),
+				[&](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0; }
+			);
+			if (itClient != clients_.end())
+			{
+				clients_.erase(itClient);
+			}
+		}
+
 		void ClientHandler::send()
 		{
 			for (auto& client : clients_)
@@ -67,16 +80,15 @@ namespace network
 			while (true)
 			{
 				Datagram datagram;
-				sockaddr_in from{ 0 };
-				socklen_t length = sizeof(from);
+				sockaddr_storage from{ 0 };
+				socklen_t length = sizeof(sockaddr_storage);
 				int received = ::recvfrom(socket_, reinterpret_cast<char*>(&datagram), Datagram::DatagramMaxSize, 0, reinterpret_cast<sockaddr*>(&from), &length);
 				if (received > 0)
 				{
 					if (received > Datagram::HeaderSize)
 					{
 						datagram.bodySize = received - Datagram::HeaderSize;
-						// TODO sockaddr_storage -> IPv4 + IPv6 support
-						auto& client = getOrCreate(reinterpret_cast<sockaddr_storage&>(from));
+						auto& client = getOrCreate(from);
 						client.onReceived(std::move(datagram));
 					}
 					else
@@ -88,7 +100,6 @@ namespace network
 				{
 					if (received < 0)
 					{
-						//!< Gestion des erreurs
 						auto error = error::latest();
 						if (error != error::WOULDBLOCK)
 						{
@@ -111,8 +122,7 @@ namespace network
 			auto itClient = std::find_if(
 				clients_.begin(),
 				clients_.end(),
-				[&](const std::unique_ptr<Client>& client) { return equal(client->address(), address); }
-				//[&](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0; }
+				[&](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0;}
 			);
 			if (itClient != clients_.end())
 			{
@@ -128,26 +138,6 @@ namespace network
 		void ClientHandler::onReceived(std::unique_ptr<event::Event>&& event)
 		{
 			events_.push_back(std::move(event));
-		}
-
-		bool ClientHandler::equal(const sockaddr_storage& left, const sockaddr_storage& right)
-		{
-			struct sockaddr_in* left_in = (struct sockaddr_in*) & left;
-			struct sockaddr_in* right_in = (struct sockaddr_in*) & right;
-			// TODO IPv6 only !!!!
-			unsigned char* left_ip = (unsigned char*)& left_in->sin_addr.s_addr;
-			unsigned char* right_ip = (unsigned char*)& right_in->sin_addr.s_addr;
-			if (left_ip[0] != right_ip[0] || left_ip[1] != right_ip[1] || left_ip[2] != right_ip[2] || left_ip[3] != right_ip[3]) {
-				return false;
-			}
-
-			unsigned short left_port = left_in->sin_port;
-			unsigned short right_port = right_in->sin_port;
-			if (left_port != right_port) {
-				return false;
-			}
-
-			return true;
 		}
 
 	}

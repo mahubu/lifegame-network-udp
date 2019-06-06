@@ -38,7 +38,6 @@ namespace network
 			static constexpr uint16_t BodyMaxSize = PacketMaxSize - HeaderSize;
 			static constexpr size_t MaxPacketsPerMessage = 32; // Maximum allowed message size: ~40ko
 			static constexpr size_t MaxMessageSize = MaxPacketsPerMessage * BodyMaxSize;
-			static constexpr size_t MaxPacketQueueSize = 2 * MaxPacketsPerMessage;
 
 			Header header;
 			std::array<PacketUnit, BodyMaxSize> body{ 0 };

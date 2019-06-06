@@ -4,6 +4,7 @@
 #include <network/Packet.hpp>
 #include <network/PacketHolder.hpp>
 #include <network/event/Event.hpp>
+#include <chrono>
 #include <list>
 #include <vector>
 
@@ -51,6 +52,11 @@ namespace network
 			size_t size() const { return queue_.size(); };
 
 			/*
+			* @return whether (or not) message sending is idle & client may be disconnected.
+			*/
+			bool idle() const { return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastSerializedTime_).count() >= 1000; };
+
+			/*
 			* @return the next packet identifier that will be sent.
 			*/
 			udp::Packet::IdType nextId() const { return nextId_; };
@@ -58,12 +64,13 @@ namespace network
 			/*
 			* @return the packet identifier that is expected to be sent next.
 			*/
-			udp::Packet::IdType nextExpected() const { return nextExpected_; };
+			udp::Packet::IdType nextExpected() const { return nextExpectedId_; };
 
 		private:
 			std::vector<udp::PacketHolder> queue_;
 			udp::Packet::IdType nextId_{ 0 };
-			udp::Packet::IdType nextExpected_{ 0 };
+			udp::Packet::IdType nextExpectedId_{ 0 };
+			std::chrono::time_point<std::chrono::system_clock> lastSerializedTime_{ std::chrono::system_clock::now() };
 
 		};
 	}

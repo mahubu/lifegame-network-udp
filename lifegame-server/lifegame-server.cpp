@@ -45,13 +45,13 @@ int main()
 			else if (event->is<network::event::Disconnection>())
 			{
 				std::cout << "Disconnection." << std::endl;
-
+				clientHandler.disconnect(event->client());
 			}
 			else if (event->is<network::event::Exchange>())
 			{
 				auto exchange = event->as<network::event::Exchange>();
 				auto packet = exchange->packet();
-				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << "' (" << packet.size() << ")" << std::endl;
+				std::cout << "Received: '" << std::string(packet.begin(), packet.end()) << std::endl;
 
 				std::ostringstream stream;
 				stream << "s->c " << i++;

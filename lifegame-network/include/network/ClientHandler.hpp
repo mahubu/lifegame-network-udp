@@ -50,6 +50,13 @@ namespace network
 			void queue(const sockaddr_storage& target, std::vector<PacketUnit>&& packet);
 
 			/*
+			* @brief Disconnect a client.
+			*
+			* @param target the client to disconnect, as an address.
+			*/
+			void disconnect(const sockaddr_storage& address);
+
+			/*
 			* @brief Send enqueued messages to the clients.
 			*/
 			void send();
@@ -73,7 +80,6 @@ namespace network
 
 			Client& getOrCreate(const sockaddr_storage& address);
 			void onReceived(std::unique_ptr<event::Event>&& event);
-			bool equal(const sockaddr_storage& left, const sockaddr_storage& right);
 
 		};
 	}
