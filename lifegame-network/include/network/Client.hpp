@@ -19,7 +19,7 @@ namespace network
 		class Client
 		{
 		public:
-			Client(ClientHandler& handler, const sockaddr_storage& address);
+			Client(ClientHandler& handler, const uint16_t uid, const sockaddr_storage& address);
 			Client(const Client& client) = delete;
 			Client& operator=(const Client& client) = delete;
 			Client(Client&& client) = delete;
@@ -46,15 +46,20 @@ namespace network
 			void onReceived(Datagram&& datagram);
 
 			/*
+			* @return the client unique identifier.
+			*/
+			uint16_t uid() const { return client_.uid; }
+
+			/*
 			* @return the client adress.
 			*/
-			const sockaddr_storage& address() const { return address_; }
+			const sockaddr_storage& address() const { return client_.address; }
 
 		private:
 			ClientHandler& clientHandler_;
-			sockaddr_storage address_;
+			event::Client client_;
 			Datagram::IdType nextDatagramIdToSend_{ 0 };
-			handler::AckHandler receptionAck_;	// Detect missing received datagrams and duplicates.
+			handler::AckHandler receptionAck_;		// Detect missing received datagrams and duplicates.
 			handler::AckHandler sendingAck_;		// Detect lose sended datagrams.
 			handler::ReceptionHandler receptionHandler_;
 			handler::SendingHandler sendingHandler_;

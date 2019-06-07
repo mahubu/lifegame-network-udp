@@ -2,6 +2,7 @@
 #include <network/Client.hpp>
 #include <network/ClientHandler.hpp>
 #include <network/event/Disconnection.hpp>
+#include <network/event/Event.hpp>
 #include <network/event/Exchange.hpp>
 #include <assert.h>
 #include <memory>
@@ -14,9 +15,10 @@ namespace network
 {
 	namespace udp
 	{
-		Client::Client(ClientHandler& handler, const sockaddr_storage& address) : clientHandler_(handler)
+		Client::Client(ClientHandler& handler, const uint16_t uid, const sockaddr_storage& address) : clientHandler_(handler)
 		{
-			std::memcpy(&address_, &address, sizeof(address));
+			client_.uid = uid;
+			std::memcpy(&client_.address, &address, sizeof(address));
 		}
 
 		bool Client::fill(Datagram& datagram)
@@ -40,7 +42,7 @@ namespace network
 		void Client::send()
 		{
 			if (sendingHandler_.idle()) {
-				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, address_));
+				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, client_));
 				return;
 			}
 
@@ -51,14 +53,14 @@ namespace network
 				{
 					break;
 				}
-				::sendto(clientHandler_.socket_, reinterpret_cast<const char*>(&datagram), static_cast<int>(datagram.size()), 0, reinterpret_cast<const sockaddr*>(&address_), sizeof(address_));
+				::sendto(clientHandler_.socket_, reinterpret_cast<const char*>(&datagram), static_cast<int>(datagram.size()), 0, reinterpret_cast<const sockaddr*>(&client_.address), sizeof(client_.address));
 			}
 		}
 
 		void Client::onReceived(Datagram&& datagram)
 		{
 			if (receptionHandler_.idle()) {
-				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, address_));
+				clientHandler_.onReceived(std::make_unique<event::Disconnection>(event::Disconnection::Reason::Lost, client_));
 				return;
 			}
 
@@ -105,7 +107,7 @@ namespace network
 			receptionHandler_.unserialize(packets);
 			for (auto&& packet : packets)
 			{
-				clientHandler_.onReceived(std::make_unique<event::Exchange>(std::move(packet), address_));
+				clientHandler_.onReceived(std::make_unique<event::Exchange>(std::move(packet), client_));
 			}
 		}
 

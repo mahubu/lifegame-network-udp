@@ -75,6 +75,7 @@ namespace network
 
 		private:
 			SOCKET socket_{ INVALID_SOCKET };
+			uint16_t nextClient{ 0 };
 			std::vector<std::unique_ptr<Client>> clients_;
 			std::vector<std::unique_ptr<event::Event>> events_;
 

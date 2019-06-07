@@ -7,6 +7,15 @@ namespace network
 	namespace event
 	{
 		/*
+		* @brief A client associated to an event.
+		*/
+		struct Client
+		{
+			uint16_t uid{ 0 };
+			sockaddr_storage address{ 0 };
+		};
+
+		/*
 		* @brief An event template.
 		*/
 		class Event
@@ -19,6 +28,7 @@ namespace network
 			{
 				return type_ == M::STATIC_TYPE;
 			}
+
 			/*
 			* @return the event as one of the given type.
 			*/
@@ -27,7 +37,10 @@ namespace network
 				return static_cast<const M*>(this);
 			}
 
-			const sockaddr_storage& client() const { return client_; };
+			/*
+			* @return the client associated to the event.
+			*/
+			const Client& client() const { return client_; };
 
 		protected:
 			enum class Type
@@ -37,14 +50,15 @@ namespace network
 				Exchange
 			};
 
-			Event(const Type type, const sockaddr_storage& client) : type_(type)/*, client_(client)*/
+			Event(const Type type, const Client& client) : type_(type)
 			{
-				memcpy(&client_, &client, sizeof(client));
+				client_.uid = client.uid;
+				std::memcpy(&client_.address, &client.address, sizeof(client.address));
 			}
 
 		private:
 			Type type_;
-			sockaddr_storage client_;
+			Client client_;
 
 		};
 	}

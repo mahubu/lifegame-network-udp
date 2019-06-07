@@ -15,7 +15,7 @@ namespace network
 		{
 		public:
 			static const Event::Type STATIC_TYPE = Event::Type::Exchange;
-			Exchange(const std::vector<PacketUnit>& packet, const sockaddr_storage& client) : Event(Type::Exchange, client), packet_(packet)
+			Exchange(const std::vector<PacketUnit>& packet, const Client& client) : Event(Type::Exchange, client), packet_(packet)
 			{
 			}
 			std::vector<PacketUnit> packet() const;

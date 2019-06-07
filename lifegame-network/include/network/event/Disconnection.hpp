@@ -18,7 +18,7 @@ namespace network
 				Intentional,
 				Lost,
 			};
-			Disconnection(const Reason reason, const sockaddr_storage& client) : Event(Type::Disconnection, client), reason_(reason)
+			Disconnection(const Reason reason, const Client& client) : Event(Type::Disconnection, client), reason_(reason)
 			{
 			}
 			Reason reason() const;

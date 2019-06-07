@@ -80,15 +80,15 @@ namespace network
 			while (true)
 			{
 				Datagram datagram;
-				sockaddr_storage from{ 0 };
+				sockaddr_storage address{ 0 };
 				socklen_t length = sizeof(sockaddr_storage);
-				int received = ::recvfrom(socket_, reinterpret_cast<char*>(&datagram), Datagram::DatagramMaxSize, 0, reinterpret_cast<sockaddr*>(&from), &length);
+				int received = ::recvfrom(socket_, reinterpret_cast<char*>(&datagram), Datagram::DatagramMaxSize, 0, reinterpret_cast<sockaddr*>(&address), &length);
 				if (received > 0)
 				{
 					if (received > Datagram::HeaderSize)
 					{
 						datagram.bodySize = received - Datagram::HeaderSize;
-						auto& client = getOrCreate(from);
+						auto& client = getOrCreate(address);
 						client.onReceived(std::move(datagram));
 					}
 					else
@@ -118,7 +118,6 @@ namespace network
 
 		Client& ClientHandler::getOrCreate(const sockaddr_storage& address)
 		{
-
 			auto itClient = std::find_if(
 				clients_.begin(),
 				clients_.end(),
@@ -130,7 +129,7 @@ namespace network
 			}
 			else
 			{
-				clients_.push_back(std::make_unique<Client>(*this, address));
+				clients_.push_back(std::make_unique<Client>(*this, ++nextClient, address));
 				return *(clients_.back());
 			}
 		}

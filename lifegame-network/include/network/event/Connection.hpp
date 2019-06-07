@@ -18,7 +18,7 @@ namespace network
 				Successfull,
 				Failed,
 			};
-			Connection(const State state, const sockaddr_storage& client) : Event(Type::Connection, client), state_(state)
+			Connection(const State state, const Client& client) : Event(Type::Connection, client), state_(state)
 			{
 			}
 			State state() const;
