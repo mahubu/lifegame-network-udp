@@ -1,4 +1,4 @@
-# lifegame-network-tcp
+# lifegame-network-udp
 A simple life game over UDP network.
 
 ## Motivation
