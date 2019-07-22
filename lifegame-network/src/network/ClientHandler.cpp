@@ -57,9 +57,9 @@ namespace network
 		void ClientHandler::disconnect(const sockaddr_storage& address)
 		{
 			auto itClient = std::find_if(
-				clients_.begin(),
-				clients_.end(),
-				[&](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0; }
+				clients_.cbegin(),
+				clients_.cend(),
+				[&address](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0; }
 			);
 			if (itClient != clients_.end())
 			{
@@ -119,11 +119,11 @@ namespace network
 		Client& ClientHandler::getOrCreate(const sockaddr_storage& address)
 		{
 			auto itClient = std::find_if(
-				clients_.begin(),
-				clients_.end(),
-				[&](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0;}
+				clients_.cbegin(),
+				clients_.cend(),
+				[&address](const std::unique_ptr<Client>& client) { return memcmp(&(client->address()), &address, sizeof(address)) == 0;}
 			);
-			if (itClient != clients_.end())
+			if (itClient != clients_.cend())
 			{
 				return *(itClient->get());
 			}

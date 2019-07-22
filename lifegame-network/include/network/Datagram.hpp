@@ -13,7 +13,7 @@ namespace network
 		*/
 		struct Datagram
 		{
-			typedef uint16_t IdType;
+			using IdType = uint16_t;
 
 			struct Header
 			{

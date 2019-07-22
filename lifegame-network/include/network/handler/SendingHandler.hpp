@@ -40,10 +40,18 @@ namespace network
 			*/
 			size_t serialize(udp::Datagram::IdType datagram, PacketUnit* rawPacket, const size_t rawPacketSize);
 
-			// TODO doc
+			/*
+			* @brief Action taken when a sended packet has been acked.
+			*
+			* @param datagram the datagram id of the acked packet.
+			*/
 			void onAcked(udp::Datagram::IdType datagram);
 
-			// TODO doc
+			/*
+			* @brief Action taken when a sended packet has been lost.
+			*
+			* @param datagram the datagram id of the lost packet.
+			*/
 			void onLost(udp::Datagram::IdType datagram);
 
 			/*

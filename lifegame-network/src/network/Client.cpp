@@ -82,7 +82,7 @@ namespace network
 			}
 
 			// Handle sended packets that have NOT been acked.
-			const auto sentLosses = sendingAck_.losses();
+			const auto sentLosses = sendingAck_.pollLosses();
 			for (const auto loss : sentLosses)
 			{
 				sendingHandler_.onLost(loss);
@@ -105,7 +105,7 @@ namespace network
 
 			std::vector<std::vector<PacketUnit>> packets;
 			receptionHandler_.unserialize(packets);
-			for (auto&& packet : packets)
+			for (auto& packet : packets)
 			{
 				clientHandler_.onReceived(std::make_unique<event::Exchange>(std::move(packet), client_));
 			}

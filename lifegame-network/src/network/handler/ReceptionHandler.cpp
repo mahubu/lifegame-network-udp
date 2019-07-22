@@ -29,7 +29,6 @@ namespace network
 			}
 		}
 
-		// TODO by reference
 		void ReceptionHandler::onPacketReceived(const udp::Packet* packet)
 		{
 			if (!helper::isNewer(packet->id(), lastProcessedId_))
@@ -46,7 +45,7 @@ namespace network
 			else
 			{
 				// Find the first iterator with an id equals to or newer than our packet, the packet must be inserted before that one.
-				auto index = std::find_if(queue_.begin(), queue_.end(), [&packet](const udp::Packet& p) { return p.id() == packet->id() || helper::isNewer(p.id(), packet->id()); });
+				auto index = std::find_if(queue_.cbegin(), queue_.cend(), [&packet](const udp::Packet& p) { return p.id() == packet->id() || helper::isNewer(p.id(), packet->id()); });
 				// Make sure the packet is not inserted multiple times.
 				if (index->id() != packet->id())
 				{
@@ -62,8 +61,6 @@ namespace network
 			std::vector<udp::Packet>::iterator latestPacket;
 			while (packetIt != endIt)
 			{
-				// TODO remove too old & malformed packet.
-
 				// Complete packet.
 				if (packetIt->type() == udp::Packet::Type::Complete)
 				{
@@ -128,7 +125,6 @@ namespace network
 				// Unknown / malformed / incomplete packet
 				else
 				{
-					//++packetIt;
 					break;
 				}
 			}

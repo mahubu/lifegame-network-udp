@@ -163,7 +163,7 @@ namespace network
 			return newAcks;
 		}
 
-		std::vector<uint16_t> AckHandler::losses()
+		std::vector<uint16_t> AckHandler::pollLosses()
 		{
 			std::vector<uint16_t> l(losses_);
 			losses_.clear();

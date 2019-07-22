@@ -16,7 +16,6 @@ namespace network
 		class Client;
 		class ClientHandler
 		{
-			// TODO avoid using friend if possible!
 			friend class Client;
 
 		public:

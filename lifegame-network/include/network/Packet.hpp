@@ -14,7 +14,7 @@ namespace network
 		*/
 		struct Packet
 		{
-			typedef uint16_t IdType;
+			using IdType = uint16_t;
 
 			enum class Type : uint8_t
 			{
@@ -42,11 +42,11 @@ namespace network
 			Header header;
 			std::array<PacketUnit, BodyMaxSize> body{ 0 };
 
-			/*inline*/ IdType id() const { return header.id; }
-			/*inline*/ uint16_t bodySize() const { return header.size; }
-			/*inline*/ Type type() const { return header.type; }
-			/*inline*/ uint16_t size() const { return HeaderSize + header.size; }
-			/*inline*/ PacketUnit* bodyData() { return body.data(); }
+			inline IdType id() const { return header.id; }
+			inline uint16_t bodySize() const { return header.size; }
+			inline Type type() const { return header.type; }
+			inline uint16_t size() const { return HeaderSize + header.size; }
+			inline PacketUnit* bodyData() { return body.data(); }
 
 			/*
 			* @brief Serialize the packet as a 'PacketUnit' array.

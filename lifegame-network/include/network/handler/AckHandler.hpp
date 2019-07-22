@@ -63,9 +63,11 @@ namespace network
 			std::vector<uint16_t> newAcks() const;
 
 			/*
-			* @return the latest losses (clear losses on call !).
+			* @brief Clear and return latest losses.
+			*
+			* @return the latest losses.
 			*/
-			std::vector<uint16_t> losses(); // TODO clear loses !!! -> another method ??? -> pollLosses() ????
+			std::vector<uint16_t> pollLosses();
 
 		private:
 			uint16_t lastAck_ = -1; // -1 stands for 'no last ack known'.

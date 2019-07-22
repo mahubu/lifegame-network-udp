@@ -90,7 +90,7 @@ namespace network
 				std::remove_if(
 					queue_.begin(),
 					queue_.end(),
-					[&](const udp::PacketHolder& holder) { return holder.isSentWith(datagram); }
+					[&datagram](const udp::PacketHolder& holder) { return holder.isSentWith(datagram); }
 				),
 				queue_.cend()
 			);

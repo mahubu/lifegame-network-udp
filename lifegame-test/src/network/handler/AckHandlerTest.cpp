@@ -37,7 +37,7 @@ namespace network
 			ASSERT_TRUE(handler.previousAcks() == MASK_COMPLETE);
 			ASSERT_FALSE(handler.isAcked(0));
 			ASSERT_FALSE(handler.isNewlyAcked(0));
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 		}
 
 		void AckHandlerTest::updateFirstPacketTest()
@@ -50,7 +50,7 @@ namespace network
 			ASSERT_TRUE(handler.isNewlyAcked(0));
 			ASSERT_TRUE(handler.newAcks().size() == 1);
 			ASSERT_TRUE(handler.newAcks()[0] == 0);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 		}
 
 		void AckHandlerTest::updateMissingPacketTest()
@@ -65,7 +65,7 @@ namespace network
 			ASSERT_TRUE(handler.isAcked(0));
 			ASSERT_TRUE(handler.isNewlyAcked(2));
 			ASSERT_FALSE(handler.isNewlyAcked(0));
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 		}
 
 		void AckHandlerTest::updateLatePacketTest()
@@ -83,7 +83,7 @@ namespace network
 			ASSERT_TRUE(handler.isNewlyAcked(1));
 			ASSERT_FALSE(handler.isNewlyAcked(2));
 			ASSERT_FALSE(handler.isNewlyAcked(0));
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 		}
 
 		void AckHandlerTest::updateEmptyMaskPacketTest()
@@ -97,7 +97,7 @@ namespace network
 			ASSERT_TRUE(handler.lastAck() == 66);
 			ASSERT_TRUE(handler.isNewlyAcked(66));
 			ASSERT_TRUE(handler.previousAcks() == MASK_LAST_ACKED);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 
 			handler.update(67, 0, true);
 			ASSERT_TRUE(handler.lastAck() == 67);
@@ -119,7 +119,7 @@ namespace network
 			ASSERT_TRUE(handler.lastAck() == 68);
 			ASSERT_TRUE(handler.isNewlyAcked(68));
 			ASSERT_TRUE(handler.previousAcks() == MASK_COMPLETE);
-			auto losses = handler.losses();
+			auto losses = handler.pollLosses();
 			ASSERT_TRUE(losses.size() == 1);
 			ASSERT_TRUE(losses[0] == 3);
 			for (uint16_t i = 4; i < 66; ++i)
@@ -154,24 +154,23 @@ namespace network
 			handler.update(67, 0, true);
 			handler.update(68, MASK_COMPLETE, true);
 			handler.update(0, 0, true);
-			// TODO clear losses ?
-			handler.losses();
+			handler.pollLosses();
 
 			handler.update(133, 0, true);
 			ASSERT_TRUE(handler.lastAck() == 133);
 			ASSERT_TRUE(handler.previousAcks() == 0);
-			auto losses133 = handler.losses();
+			auto losses133 = handler.pollLosses();
 			ASSERT_TRUE(losses133.size() == 0);
 			
 			handler.update(132, MASK_COMPLETE, true);
 			ASSERT_TRUE(handler.lastAck() == 133);
 			ASSERT_TRUE(handler.previousAcks() == MASK_COMPLETE);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 
 			handler.update(234, 0, true);
 			ASSERT_TRUE(handler.lastAck() == 234);
 			ASSERT_TRUE(handler.previousAcks() == 0);
-			auto losses234 = handler.losses();
+			auto losses234 = handler.pollLosses();
 			const auto firstLost = 134;
 			const auto lastLost = 169;
 			const auto totalLost = lastLost - firstLost + 1;
@@ -195,21 +194,20 @@ namespace network
 			handler.update(133, 0, true);
 			handler.update(132, MASK_COMPLETE, true);
 			handler.update(234, 0, true);
-			// TODO clear losses
-			handler.losses();
+			handler.pollLosses();
 
 			handler.update(234, MASK_COMPLETE, true);
 			handler.update(236, MASK_COMPLETE, true);
 			handler.update(301, 0, true);
 			ASSERT_TRUE(handler.lastAck() == 301);
 			ASSERT_TRUE(handler.previousAcks() == 0);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 			ASSERT_FALSE(handler.isAcked(237));
 
 			handler.update(237, MASK_COMPLETE, true);
 			ASSERT_TRUE(handler.lastAck() == 301);
 			ASSERT_TRUE(handler.previousAcks() == MASK_LAST_ACKED);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 			ASSERT_TRUE(handler.isAcked(237));
 			ASSERT_TRUE(handler.isNewlyAcked(237));
 		}
@@ -231,13 +229,12 @@ namespace network
 			handler.update(236, MASK_COMPLETE, true);
 			handler.update(301, 0, true);
 			handler.update(237, MASK_COMPLETE, true);
-			// TODO clear losses ?
-			handler.losses();
+			handler.pollLosses();
 
 			handler.update(301, MASK_COMPLETE, true);
 			ASSERT_TRUE(handler.lastAck() == 301);
 			ASSERT_TRUE(handler.previousAcks() == MASK_COMPLETE);
-			ASSERT_TRUE(handler.losses().empty());
+			ASSERT_TRUE(handler.pollLosses().empty());
 
 			handler.update(303, MASK_COMPLETE, true);
 			auto newAcks = handler.newAcks();
